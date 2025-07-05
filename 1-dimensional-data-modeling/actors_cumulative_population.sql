@@ -50,7 +50,7 @@ with current_year_actor_films as (
         select max((film_stats).film_year)
         from
             actors,
-            lateral unnest(filmography) as film_stats
+            unnest(filmography) as film_stats
     ) + 1
 ),
 
