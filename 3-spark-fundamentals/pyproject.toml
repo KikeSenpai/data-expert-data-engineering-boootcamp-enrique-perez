@@ -1,0 +1,22 @@
+[project]
+name = "3-spark-fundamentals"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pyspark[sql]==3.5.0",
+    "numpy<2.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+markers = [
+    "unit: for executing unit tests",
+]
