@@ -33,42 +33,56 @@ repositories {
     }
 }
 
-configurations {
-    register("flinkShadowJar") {
-        exclude(group = "org.apache.flink", module = "force-shading")
-        exclude(group = "com.google.code.findbugs", module = "jsr305")
-        exclude(group = "org.slf4j", module = "slf4j-log4j12")
-        exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j-impl")
+ktlint {
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.HTML)
     }
+    filter {
+        exclude("**/build/**")
+        include("**/src/**/*.kt")
+    }
+}
+
+val flinkShadowJar by configurations.registering {
+    exclude(group = "org.apache.flink", module = "force-shading")
+    exclude(group = "com.google.code.findbugs", module = "jsr305")
+    exclude(group = "org.slf4j", module = "slf4j-log4j12")
+    exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j-impl")
 }
 
 val flinkVersion = "1.20.2"
 val log4jVersion = "2.24.3"
+val kafkaConnectorVersion = "3.4.0"
+val jdbcConnectorVersion = "3.3.0"
 
 dependencies {
-    // Flink dependencies
-    compileOnly("org.apache.flink:flink-streaming-java:${flinkVersion}")
-    compileOnly("org.apache.flink:flink-clients:${flinkVersion}")
-    compileOnly("org.apache.flink:flink-table-api-java:${flinkVersion}")
-    compileOnly("org.apache.flink:flink-table-api-java-bridge:${flinkVersion}")
-    compileOnly("org.apache.flink:flink-table-planner-loader:${flinkVersion}")
-    compileOnly("org.apache.flink:flink-table-runtime:${flinkVersion}")
+    // Flink core dependencies
+    compileOnly("org.apache.flink:flink-streaming-java:$flinkVersion")
+    compileOnly("org.apache.flink:flink-clients:$flinkVersion")
+    compileOnly("org.apache.flink:flink-table-api-java:$flinkVersion")
+    compileOnly("org.apache.flink:flink-table-api-java-bridge:$flinkVersion")
+    compileOnly("org.apache.flink:flink-table-planner-loader:$flinkVersion")
+    compileOnly("org.apache.flink:flink-table-runtime:$flinkVersion")
+
+    // Flink connectors and drivers
+    flinkShadowJar("org.apache.flink:flink-connector-kafka:${kafkaConnectorVersion + "-" + flinkVersion.substringBeforeLast(".")}")
+    flinkShadowJar("org.apache.flink:flink-connector-jdbc:${jdbcConnectorVersion + "-" + flinkVersion.substringBeforeLast(".")}")
 
     // Logging dependencies
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}")
-    runtimeOnly("org.apache.logging.log4j:log4j-api:${log4jVersion}")
-    runtimeOnly("org.apache.logging.log4j:log4j-core:${log4jVersion}")
-    
-    // Other dependencies
-    implementation("org.flywaydb:flyway-core:9.22.3")
-    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
+    testRuntimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    testRuntimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
 
-    // HTTP4K dependencies
+    // http4K dependencies
     implementation(platform("org.http4k:http4k-bom:6.12.0.0"))
     implementation("org.http4k:http4k-core")
     implementation("org.http4k:http4k-client-apache")
     implementation("org.http4k:http4k-format-jackson")
-//    implementation("org.http4k:http4k-server-netty")
+
+    // Other dependencies
+    implementation("org.flywaydb:flyway-core:9.22.3")
+    runtimeOnly("org.postgresql:postgresql:42.7.7")
 
     // Test dependencies
     testImplementation(kotlin("test"))
@@ -77,13 +91,13 @@ dependencies {
 // Make compileOnly dependencies available for tests:
 sourceSets {
     main {
-        compileClasspath += configurations["flinkShadowJar"]
-        runtimeClasspath += configurations["flinkShadowJar"]
+        compileClasspath += flinkShadowJar.get()
+        runtimeClasspath += flinkShadowJar.get()
     }
 
     test {
-        compileClasspath += configurations["flinkShadowJar"]
-        runtimeClasspath += configurations["flinkShadowJar"]
+        compileClasspath += flinkShadowJar.get()
+        runtimeClasspath += flinkShadowJar.get()
     }
 }
 
@@ -102,13 +116,21 @@ tasks {
 
     named<ShadowJar>("shadowJar") {
         description = "Create the application uber jar with all dependencies"
-        configurations = listOf(project.configurations.getByName("flinkShadowJar"))
+        configurations = listOf(
+            flinkShadowJar.get(),
+            project.configurations.runtimeClasspath.get(),
+        )
         manifest {
             attributes("Main-Class" to mainClassName)
         }
         archiveClassifier.set("")
         isZip64 = true
         mergeServiceFiles()
+
+        exclude("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
+        exclude("org.apache.logging.log4j:log4j-api:$log4jVersion")
+        exclude("org.apache.logging.log4j:log4j-core:$log4jVersion")
+        exclude("org.slf4j:slf4j-log4j12:.*")
     }
 
     register<Exec>("dockerUp") {

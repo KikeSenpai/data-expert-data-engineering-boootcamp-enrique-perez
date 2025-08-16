@@ -1,4 +1,4 @@
-package com.aprendeingenieriadedatos.bootcampflink.rawgeodata
+package com.aprendeingenieriadedatos.bootcampflink.geodataenrichment
 
 import com.aprendeingenieriadedatos.bootcampflink.configs.DbConfig
 
@@ -6,7 +6,8 @@ object EnrichedGeoDataSink {
     const val TABLE_NAME = "processed_events"
     val POSTGRES_URL = "jdbc:postgresql://${DbConfig.POSTGRES_HOST}:${DbConfig.POSTGRES_PORT}/${DbConfig.POSTGRES_DB}"
 
-    val query = """
+    val query =
+        """
         CREATE TABLE $TABLE_NAME (
             ip VARCHAR,
             event_timestamp TIMESTAMP(3),
@@ -22,5 +23,5 @@ object EnrichedGeoDataSink {
             'password' = '${DbConfig.POSTGRES_PASSWORD}',
             'driver' = 'org.postgresql.Driver'
         );
-    """.trimIndent()
+        """.trimIndent()
 }

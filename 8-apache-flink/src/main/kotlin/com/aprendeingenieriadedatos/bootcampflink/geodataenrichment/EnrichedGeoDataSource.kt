@@ -1,4 +1,4 @@
-package com.aprendeingenieriadedatos.bootcampflink.rawgeodata
+package com.aprendeingenieriadedatos.bootcampflink.geodataenrichment
 
 import com.aprendeingenieriadedatos.bootcampflink.configs.KafkaConfig
 
@@ -6,7 +6,8 @@ object EnrichedGeoDataSource {
     const val TABLE_NAME = "events"
     const val TIMESTAMP_PATTERN = "yyyy-MM-dd''T''HH:mm:ss.SSS''Z''"
 
-    val query = """
+    val query =
+        """
         CREATE TABLE $TABLE_NAME (
             url VARCHAR,
             referrer VARCHAR,
@@ -28,5 +29,5 @@ object EnrichedGeoDataSource {
             'properties.auto.offset.reset' = 'latest',
             'format' = 'json'
         );
-    """.trimIndent()
+        """.trimIndent()
 }

@@ -1,9 +1,9 @@
 package com.aprendeingenieriadedatos.bootcampflink
 
-import com.aprendeingenieriadedatos.bootcampflink.rawgeodata.EnrichedGeoDataOperator
-import com.aprendeingenieriadedatos.bootcampflink.rawgeodata.EnrichedGeoDataSink
+import com.aprendeingenieriadedatos.bootcampflink.geodataenrichment.EnrichedGeoDataOperator
+import com.aprendeingenieriadedatos.bootcampflink.geodataenrichment.EnrichedGeoDataSink
+import com.aprendeingenieriadedatos.bootcampflink.geodataenrichment.EnrichedGeoDataSource
 import com.aprendeingenieriadedatos.bootcampflink.udfs.GetLocation
-import com.aprendeingenieriadedatos.bootcampflink.rawgeodata.EnrichedGeoDataSource
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.EnvironmentSettings
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -11,7 +11,7 @@ import java.time.Duration
 
 fun main() {
     val env = StreamExecutionEnvironment.getExecutionEnvironment()
-    
+
     env.parallelism = 2
     env.enableCheckpointing(Duration.ofSeconds(10).toMillis())
     with(env.checkpointConfig) {
@@ -22,11 +22,12 @@ fun main() {
         enableUnalignedCheckpoints()
     }
 
-    val settings = EnvironmentSettings
-        .newInstance()
-        .inStreamingMode()
-        .build()
-    
+    val settings =
+        EnvironmentSettings
+            .newInstance()
+            .inStreamingMode()
+            .build()
+
     val tableEnv = StreamTableEnvironment.create(env, settings)
 
     tableEnv.createTemporarySystemFunction("GetLocation", GetLocation::class.java)
@@ -35,12 +36,7 @@ fun main() {
 
     tableEnv.executeSql(EnrichedGeoDataSink.query)
 
-    tableEnv.executeSql(
-        EnrichedGeoDataOperator.buildQuery(
-            EnrichedGeoDataSource.TABLE_NAME,
-            EnrichedGeoDataSink.TABLE_NAME
-        )
-    )
+    val result = tableEnv.sqlQuery(EnrichedGeoDataOperator.buildQuery(EnrichedGeoDataSource.TABLE_NAME))
 
-    env.execute("My Bootcamp Flink Job")
+    result.executeInsert(EnrichedGeoDataSink.TABLE_NAME).await()
 }

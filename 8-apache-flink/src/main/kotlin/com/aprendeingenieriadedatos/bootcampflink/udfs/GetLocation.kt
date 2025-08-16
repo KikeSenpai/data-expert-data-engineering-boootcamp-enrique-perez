@@ -1,6 +1,5 @@
 package com.aprendeingenieriadedatos.bootcampflink.udfs
 
-import io.github.cdimascio.dotenv.dotenv
 import org.apache.flink.table.functions.ScalarFunction
 import org.http4k.client.ApacheClient
 import org.http4k.core.Method.GET
@@ -9,13 +8,11 @@ import org.http4k.format.Jackson.asJsonObject
 import org.http4k.format.Jackson.mapper
 
 class GetLocation : ScalarFunction() {
-    private val dotenv = dotenv {
-        filename = ".env"
-        ignoreIfMalformed = true
-        ignoreIfMissing = true
-    }
+
     private val url = "https://api.ip2location.io"
-    private val apiKey = dotenv["IP_CODING_KEY"] ?: ""
+
+    // Load from classpath resource 'app.properties'
+    private val apiKey = System.getenv("IP_CODING_KEY") ?: ""
 
     fun eval(ipAddress: String): String {
         val client = ApacheClient()
@@ -39,8 +36,8 @@ class GetLocation : ScalarFunction() {
             mapOf(
                 "country" to country,
                 "state" to state,
-                "city" to city
-            )
+                "city" to city,
+            ),
         )
     }
 }

@@ -1,19 +1,11 @@
 package com.aprendeingenieriadedatos.bootcampflink.configs
 
-import io.github.cdimascio.dotenv.dotenv
-
 object KafkaConfig {
-    private val dotenv = dotenv {
-        filename = ".env"
-        ignoreIfMalformed = true
-        ignoreIfMissing = true
-    }
-
-    val KAFKA_BOOTSTRAP_SERVERS = dotenv["KAFKA_BOOTSTRAP_SERVERS"] ?: "localhost:9092"
-    val KAFKA_TOPIC = dotenv["KAFKA_TOPIC"] ?: "default-topic"
-    val KAFKA_GROUP = dotenv["KAFKA_GROUP"] ?: "default-group"
-    val KAFKA_KEY = dotenv["KAFKA_KEY"] ?: ""
-    val KAFKA_SECRET = dotenv["KAFKA_SECRET"] ?: ""
+    val KAFKA_BOOTSTRAP_SERVERS = System.getenv("KAFKA_BOOTSTRAP_SERVERS") ?: ""
+    val KAFKA_TOPIC = System.getenv("KAFKA_TOPIC") ?: ""
+    val KAFKA_GROUP = System.getenv("KAFKA_GROUP") ?: ""
+    val KAFKA_KEY = System.getenv("KAFKA_KEY") ?: ""
+    val KAFKA_SECRET = System.getenv("KAFKA_SECRET") ?: ""
 
     init {
         require(KAFKA_KEY.isNotEmpty()) { "KAFKA_KEY environment variable is required" }

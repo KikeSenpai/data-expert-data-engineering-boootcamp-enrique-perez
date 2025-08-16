@@ -1,20 +1,13 @@
 package com.aprendeingenieriadedatos.bootcampflink.configs
 
-import io.github.cdimascio.dotenv.dotenv
 import kotlin.text.isNotEmpty
 
 object DbConfig {
-    private val dotenv = dotenv {
-        filename = ".env"
-        ignoreIfMalformed = true
-        ignoreIfMissing = true
-    }
-
-    val POSTGRES_DB = dotenv["POSTGRES_DB"] ?: "postgres"
-    val POSTGRES_USER = dotenv["POSTGRES_USER"] ?: "postgres"
-    val POSTGRES_PASSWORD = dotenv["POSTGRES_PASSWORD"] ?: "<PASSWORD>"
-    val POSTGRES_PORT = dotenv["POSTGRES_PORT"]?.toIntOrNull() ?: 5432
-    val POSTGRES_HOST = dotenv["POSTGRES_HOST"] ?: "localhost"
+    val POSTGRES_DB = System.getenv("POSTGRES_DB") ?: "postgres"
+    val POSTGRES_USER = System.getenv("POSTGRES_USER") ?: ""
+    val POSTGRES_PASSWORD = System.getenv("POSTGRES_PASSWORD") ?: ""
+    val POSTGRES_PORT = (System.getenv("POSTGRES_PORT") ?: "5432").toIntOrNull()
+    val POSTGRES_HOST = System.getenv("POSTGRES_HOST") ?: ""
 
     init {
         require(POSTGRES_USER.isNotEmpty()) { "POSTGRES_USER environment variable is required" }
