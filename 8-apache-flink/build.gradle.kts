@@ -110,10 +110,11 @@ tasks {
 
     named<ShadowJar>("shadowJar") {
         description = "Create the application uber jar with all dependencies"
-        configurations = listOf(
-            flinkShadowJar.get(),
-            project.configurations.runtimeClasspath.get(),
-        )
+        configurations =
+            listOf(
+                flinkShadowJar.get(),
+                project.configurations.runtimeClasspath.get(),
+            )
         manifest {
             attributes("Main-Class" to mainClassName)
         }

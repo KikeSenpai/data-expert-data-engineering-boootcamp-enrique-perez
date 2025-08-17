@@ -12,7 +12,9 @@ import java.time.Duration
 
 class GetLocation : ScalarFunction() {
     @Volatile private var baseUrl: String? = null
+
     @Volatile private var httpClient: HttpClient? = null
+
     @Volatile private var apiKey: String? = null
 
     override fun open(context: FunctionContext) {
@@ -48,7 +50,8 @@ class GetLocation : ScalarFunction() {
         val uri = URI.create("$url?ip=${encodedIp.trim()}&key=$encodedKey")
 
         val request =
-            HttpRequest.newBuilder(uri)
+            HttpRequest
+                .newBuilder(uri)
                 .timeout(Duration.ofSeconds(5))
                 .header("Accept", "application/json")
                 .GET()

@@ -1,5 +1,10 @@
 package com.aprendeingenieriadedatos.bootcampflink
 
+import com.aprendeingenieriadedatos.bootcampflink.geodataaggregation.AggregatedGeoDataHostOperator
+import com.aprendeingenieriadedatos.bootcampflink.geodataaggregation.AggregatedGeoDataHostReferrerOperator
+import com.aprendeingenieriadedatos.bootcampflink.geodataaggregation.AggregatedGeoDataHostReferrerSink
+import com.aprendeingenieriadedatos.bootcampflink.geodataaggregation.AggregatedGeoDataHostSink
+import com.aprendeingenieriadedatos.bootcampflink.geodataaggregation.AggregatedGeoDataSource
 import com.aprendeingenieriadedatos.bootcampflink.geodataenrichment.EnrichedGeoDataOperator
 import com.aprendeingenieriadedatos.bootcampflink.geodataenrichment.EnrichedGeoDataSink
 import com.aprendeingenieriadedatos.bootcampflink.geodataenrichment.EnrichedGeoDataSource
@@ -32,11 +37,18 @@ fun main() {
 
     tableEnv.createTemporarySystemFunction("GetLocation", GetLocation::class.java)
 
+    // Enrich the data with geolocation information
     tableEnv.executeSql(EnrichedGeoDataSource.query)
-
     tableEnv.executeSql(EnrichedGeoDataSink.query)
+    val enrichedGeoDataResult = tableEnv.sqlQuery(EnrichedGeoDataOperator.buildQuery(EnrichedGeoDataSource.TABLE_NAME))
+    enrichedGeoDataResult.executeInsert(EnrichedGeoDataSink.TABLE_NAME).await()
 
-    val result = tableEnv.sqlQuery(EnrichedGeoDataOperator.buildQuery(EnrichedGeoDataSource.TABLE_NAME))
-
-    result.executeInsert(EnrichedGeoDataSink.TABLE_NAME).await()
+    // Aggregate the data by hour
+    tableEnv.executeSql(AggregatedGeoDataSource.query)
+    tableEnv.executeSql(AggregatedGeoDataHostSink.query)
+    tableEnv.executeSql(AggregatedGeoDataHostReferrerSink.query)
+    val aggGeoDataHostResult = tableEnv.sqlQuery(AggregatedGeoDataHostOperator.buildQuery(EnrichedGeoDataSource.TABLE_NAME))
+    val aggGeoDataHostReferrerResult = tableEnv.sqlQuery(AggregatedGeoDataHostReferrerOperator.buildQuery(EnrichedGeoDataSource.TABLE_NAME))
+    aggGeoDataHostResult.executeInsert(AggregatedGeoDataHostSink.TABLE_NAME).await()
+    aggGeoDataHostReferrerResult.executeInsert(AggregatedGeoDataHostReferrerSink.TABLE_NAME).await()
 }

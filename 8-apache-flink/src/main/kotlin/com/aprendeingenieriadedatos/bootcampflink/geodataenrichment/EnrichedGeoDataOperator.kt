@@ -9,7 +9,7 @@ object EnrichedGeoDataOperator {
             referrer,
             host,
             url,
-            GetLocation(ip) AS geo_location
+            GetLocation(ip) AS geodata
         FROM $sourceTable
         """.trimIndent()
 }
