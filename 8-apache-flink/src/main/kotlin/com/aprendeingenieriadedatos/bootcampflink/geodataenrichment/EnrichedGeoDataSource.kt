@@ -24,7 +24,7 @@ object EnrichedGeoDataSource {
             'properties.group.id' = '${KafkaConfig.KAFKA_GROUP}',
             'properties.security.protocol' = 'SASL_SSL',
             'properties.sasl.mechanism' = 'PLAIN',
-            'properties.sasl.jaas.config' = 'org.apache.flink.kafka.shaded.org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${KafkaConfig.KAFKA_KEY}\" password=\"${KafkaConfig.KAFKA_SECRET}\";',
+            'properties.sasl.jaas.config' = 'org.apache.kafka.common.security.plain.PlainLoginModule required username="${KafkaConfig.KAFKA_KEY}" password="${KafkaConfig.KAFKA_SECRET}";',
             'scan.startup.mode' = 'latest-offset',
             'properties.auto.offset.reset' = 'latest',
             'format' = 'json'
