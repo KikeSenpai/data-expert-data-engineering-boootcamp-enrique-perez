@@ -74,12 +74,6 @@ dependencies {
     testRuntimeOnly("org.apache.logging.log4j:log4j-api:$log4jVersion")
     testRuntimeOnly("org.apache.logging.log4j:log4j-core:$log4jVersion")
 
-    // http4K dependencies
-    implementation(platform("org.http4k:http4k-bom:6.12.0.0"))
-    implementation("org.http4k:http4k-core")
-    implementation("org.http4k:http4k-client-apache")
-    implementation("org.http4k:http4k-format-jackson")
-
     // Other dependencies
     implementation("org.flywaydb:flyway-core:9.22.3")
     runtimeOnly("org.postgresql:postgresql:42.7.7")
