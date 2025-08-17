@@ -3,7 +3,7 @@ package com.aprendeingenieriadedatos.bootcampflink.geodataaggregation
 import com.aprendeingenieriadedatos.bootcampflink.configs.KafkaConfig
 
 object AggregatedGeoDataSource {
-    const val TABLE_NAME = "processed_events"
+    const val TABLE_NAME = "events_with_watermark"
     const val TIMESTAMP_PATTERN = "yyyy-MM-dd''T''HH:mm:ss.SSS''Z''"
 
     val query =

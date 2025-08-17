@@ -6,6 +6,8 @@ build/
 .env
 .junie
 .idea
+local/logs
+local/states
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

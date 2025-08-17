@@ -37,18 +37,33 @@ fun main() {
 
     tableEnv.createTemporarySystemFunction("GetLocation", GetLocation::class.java)
 
-    // Enrich the data with geolocation information
+    // Register source/sinks
     tableEnv.executeSql(EnrichedGeoDataSource.query)
     tableEnv.executeSql(EnrichedGeoDataSink.query)
-    val enrichedGeoDataResult = tableEnv.sqlQuery(EnrichedGeoDataOperator.buildQuery(EnrichedGeoDataSource.TABLE_NAME))
-    enrichedGeoDataResult.executeInsert(EnrichedGeoDataSink.TABLE_NAME).await()
-
-    // Aggregate the data by hour
     tableEnv.executeSql(AggregatedGeoDataSource.query)
     tableEnv.executeSql(AggregatedGeoDataHostSink.query)
     tableEnv.executeSql(AggregatedGeoDataHostReferrerSink.query)
-    val aggGeoDataHostResult = tableEnv.sqlQuery(AggregatedGeoDataHostOperator.buildQuery(EnrichedGeoDataSource.TABLE_NAME))
-    val aggGeoDataHostReferrerResult = tableEnv.sqlQuery(AggregatedGeoDataHostReferrerOperator.buildQuery(EnrichedGeoDataSource.TABLE_NAME))
-    aggGeoDataHostResult.executeInsert(AggregatedGeoDataHostSink.TABLE_NAME).await()
-    aggGeoDataHostReferrerResult.executeInsert(AggregatedGeoDataHostReferrerSink.TABLE_NAME).await()
+
+    // Build queries
+    val enrichedGeoDataTable =
+        tableEnv.sqlQuery(
+            EnrichedGeoDataOperator.buildQuery(EnrichedGeoDataSource.TABLE_NAME),
+        )
+    val aggGeoDataHostTable =
+        tableEnv.sqlQuery(
+            AggregatedGeoDataHostOperator.buildQuery(AggregatedGeoDataSource.TABLE_NAME),
+        )
+    val aggGeoDataHostReferrerTable =
+        tableEnv.sqlQuery(
+            AggregatedGeoDataHostReferrerOperator.buildQuery(AggregatedGeoDataSource.TABLE_NAME),
+        )
+
+    // Execute all inserts in one streaming job
+    val statementSet = tableEnv.createStatementSet()
+    statementSet.addInsert(EnrichedGeoDataSink.TABLE_NAME, enrichedGeoDataTable)
+    statementSet.addInsert(AggregatedGeoDataHostSink.TABLE_NAME, aggGeoDataHostTable)
+    statementSet.addInsert(AggregatedGeoDataHostReferrerSink.TABLE_NAME, aggGeoDataHostReferrerTable)
+
+    // Block once so the job stays alive; all inserts run concurrently
+    statementSet.execute().await()
 }

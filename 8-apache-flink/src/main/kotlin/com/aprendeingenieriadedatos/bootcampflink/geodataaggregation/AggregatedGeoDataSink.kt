@@ -11,7 +11,8 @@ object AggregatedGeoDataHostSink {
         CREATE TABLE $TABLE_NAME (
             event_hour TIMESTAMP(3),
             host VARCHAR,
-            num_of_hints BIGINT
+            num_hits BIGINT,
+            PRIMARY KEY (event_hour, host) NOT ENFORCED
         ) WITH (
             'connector' = 'jdbc',
             'url' = '$POSTGRES_URL',
@@ -33,7 +34,8 @@ object AggregatedGeoDataHostReferrerSink {
             event_hour TIMESTAMP(3),
             host VARCHAR,
             referrer VARCHAR,
-            num_of_hints BIGINT
+            num_hits BIGINT,
+            PRIMARY KEY (event_hour, host, referrer) NOT ENFORCED
         ) WITH (
             'connector' = 'jdbc',
             'url' = '$POSTGRES_URL',
