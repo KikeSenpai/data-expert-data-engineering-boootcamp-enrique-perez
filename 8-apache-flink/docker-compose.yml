@@ -1,0 +1,58 @@
+services:
+  flink-jobmanager:
+    image: flink:1.20.2-java11
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    env_file:
+      - .env
+    pull_policy: never
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 30
+        state.backend: rocksdb
+        state.savepoints.dir: file:///opt/flink/state/savepoints
+        state.checkpoints.dir: file:///opt/flink/state/checkpoints
+        restart-strategy.type: fixed-delay
+        restart-strategy.fixed-delay.attempts: 5
+        restart-strategy.fixed-delay.delay: 5 s
+    volumes:
+      - ./build/libs:/opt/src
+      - ./local/logs:/opt/flink/log
+      - ./local/states:/opt/flink/state
+
+  flink-taskmanager:
+    image: flink:1.20.2-java11
+    env_file:
+      - .env
+    depends_on:
+      - flink-jobmanager
+    command: taskmanager --taskmanager.registration.timeout 5 min
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 30
+        state.backend: rocksdb
+        state.savepoints.dir: file:///opt/flink/state/savepoints
+        state.checkpoints.dir: file:///opt/flink/state/checkpoints
+        restart-strategy.type: fixed-delay
+        restart-strategy.fixed-delay.attempts: 5
+        restart-strategy.fixed-delay.delay: 5 s
+        parallelism.default: 3
+    volumes:
+      - ./build/libs:/opt/src
+      - ./local/logs:/opt/flink/log
+      - ./local/states:/opt/flink/state
+
+  postgres:
+    image: postgres:16.1
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
