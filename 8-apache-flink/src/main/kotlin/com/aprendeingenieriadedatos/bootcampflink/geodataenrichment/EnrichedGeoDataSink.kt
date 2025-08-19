@@ -1,10 +1,11 @@
 package com.aprendeingenieriadedatos.bootcampflink.geodataenrichment
 
 import com.aprendeingenieriadedatos.bootcampflink.configs.DbConfig
+import com.aprendeingenieriadedatos.bootcampflink.configs.DbUrls
 
 object EnrichedGeoDataSink {
     const val TABLE_NAME = "processed_events"
-    val POSTGRES_URL = "jdbc:postgresql://${DbConfig.POSTGRES_HOST}:${DbConfig.POSTGRES_PORT}/${DbConfig.POSTGRES_DB}"
+    private val POSTGRES_URL = DbUrls.POSTGRES_URL
 
     val query =
         """
