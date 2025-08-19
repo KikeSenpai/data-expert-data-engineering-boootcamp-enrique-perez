@@ -1,21 +1,21 @@
-package com.aprendeingenieriadedatos.bootcampflink.geodataenrichment
+package com.aprendeingenieriadedatos.bootcampflink.websessions
 
 import com.aprendeingenieriadedatos.bootcampflink.configs.DbConfig
 import com.aprendeingenieriadedatos.bootcampflink.configs.DbUrls
 
-object EnrichedGeoDataSink {
-    const val TABLE_NAME = "processed_events"
+object SessionizedWebEventsSink {
+    const val TABLE_NAME = "processed_events_sessions"
     private val POSTGRES_URL = DbUrls.POSTGRES_URL
 
     val query =
         """
         CREATE TABLE IF NOT EXISTS $TABLE_NAME (
             ip VARCHAR,
-            event_timestamp TIMESTAMP(3),
-            referrer VARCHAR,
             host VARCHAR,
-            url VARCHAR,
-            geodata VARCHAR
+            session_start TIMESTAMP(3),
+            session_end TIMESTAMP(3),
+            events_in_session BIGINT,
+            PRIMARY KEY (ip, host, session_start) NOT ENFORCED
         ) WITH (
             'connector' = 'jdbc',
             'url' = '$POSTGRES_URL',

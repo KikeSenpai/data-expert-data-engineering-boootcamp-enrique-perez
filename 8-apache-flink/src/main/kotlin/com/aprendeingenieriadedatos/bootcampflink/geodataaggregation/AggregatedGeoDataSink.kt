@@ -9,7 +9,7 @@ object AggregatedGeoDataHostSink {
 
     val query =
         """
-        CREATE TABLE $TABLE_NAME (
+        CREATE TABLE IF NOT EXISTS $TABLE_NAME (
             event_hour TIMESTAMP(3),
             host VARCHAR,
             num_hits BIGINT,

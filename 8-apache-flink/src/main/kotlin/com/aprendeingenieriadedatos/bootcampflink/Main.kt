@@ -3,6 +3,7 @@ package com.aprendeingenieriadedatos.bootcampflink
 import com.aprendeingenieriadedatos.bootcampflink.pipelines.PipelineRunner
 import com.aprendeingenieriadedatos.bootcampflink.pipelines.AggregationsPipeline
 import com.aprendeingenieriadedatos.bootcampflink.pipelines.EnrichmentPipeline
+import com.aprendeingenieriadedatos.bootcampflink.pipelines.SessionizationPipeline
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.EnvironmentSettings
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
@@ -35,6 +36,7 @@ fun main() {
         listOf(
             EnrichmentPipeline,
             AggregationsPipeline,
+            SessionizationPipeline,
         ),
     )
 }

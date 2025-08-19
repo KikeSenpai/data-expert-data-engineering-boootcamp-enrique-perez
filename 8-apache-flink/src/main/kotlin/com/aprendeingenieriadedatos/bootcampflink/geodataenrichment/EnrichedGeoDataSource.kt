@@ -8,7 +8,7 @@ object EnrichedGeoDataSource {
 
     val query =
         """
-        CREATE TABLE $TABLE_NAME (
+        CREATE TABLE IF NOT EXISTS $TABLE_NAME (
             url VARCHAR,
             referrer VARCHAR,
             user_agent VARCHAR,

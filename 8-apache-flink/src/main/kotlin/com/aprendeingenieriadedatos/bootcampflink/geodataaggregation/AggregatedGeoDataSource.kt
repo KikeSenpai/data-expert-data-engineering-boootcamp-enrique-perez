@@ -8,7 +8,7 @@ object AggregatedGeoDataSource {
 
     val query =
         """
-        CREATE TABLE $TABLE_NAME (
+        CREATE TABLE IF NOT EXISTS $TABLE_NAME (
             ip VARCHAR,
             event_time VARCHAR,
             referrer VARCHAR,
